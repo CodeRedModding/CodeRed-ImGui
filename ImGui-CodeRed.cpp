@@ -342,7 +342,7 @@ void ImStyle::ParseFile(const std::filesystem::path& styleFile)
 					continue;
 				}
 
-				Format::RemoveAllChars(line, ' ');
+				//Format::RemoveAllChars(line, ' ');
 
 				for (auto settingIt = ImSettingNames.begin(); settingIt != ImSettingNames.end(); settingIt++)
 				{
@@ -373,7 +373,7 @@ void ImStyle::ParseFile(const std::filesystem::path& styleFile)
 						if (startPos != std::string::npos && endPos != std::string::npos)
 						{
 							std::string colorStr = line.substr(startPos + 1, (endPos - startPos) - 1);
-							std::vector<std::string> colorValues = Format::Split(colorStr, ',');
+							std::vector<std::string> colorValues;// = Format::Split(colorStr, ',');
 
 							if (colorValues.size() == 4)
 							{
@@ -1040,6 +1040,11 @@ void ImConsole::OnRender()
 
 					strcpy_s(bufferText, sizeof(bufferText), "");
 					reclaim_focus = true;
+				}
+
+				if (std::strlen(InputBuffer) == 0)
+				{
+					ResetAutoComplete();
 				}
 
 				if (!Candidates.empty() && ImGui::IsWindowFocused())
