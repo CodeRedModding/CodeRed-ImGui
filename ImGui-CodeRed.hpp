@@ -395,7 +395,7 @@ private:
 		char* Text;
 
 	public:
-		TextData(const ImVec4& color, TextStyles textStyle, char* text) : Color(color), Style(textStyle), Text(text) {}
+		TextData(const ImVec4& textColor, TextStyles textStyle, char* text) : Color(textColor), Style(textStyle), Text(text) {}
 		~TextData() {}
 
 	public:
@@ -409,7 +409,7 @@ private:
 			Text = nullptr;
 		}
 
-		TextData operator=(TextData textData)
+		TextData& operator=(const TextData& textData)
 		{
 			Color = textData.Color;
 			Style = textData.Style;
@@ -418,10 +418,21 @@ private:
 		}
 	};
 
+	class QueueData : public TextData
+	{
+	public:
+		TextColors Id;
+
+	public:
+		QueueData(TextColors id, TextStyles textStyle, char* text) : TextData(ImColorMap[id], textStyle, text), Id(id) {}
+		~QueueData() {}
+	};
+
 private:
 	static inline size_t MaxHistory;
 	static inline std::vector<char*> AutoCompletes;
 	static inline std::vector<TextData> ConsoleText;
+	static inline std::vector<QueueData> ConsoleQueue;
 	static inline std::vector<char*> UserHistory;
 	static inline std::vector<char*> MapCompletes;
 	static inline std::vector<char*> KeyCompletes;
@@ -451,16 +462,17 @@ public:
 	void ToggleHomosexual();
 	static void ClearAutoCompletes();
 	static void ClearConsole();
+	static void ClearQueue();
 	static void ClearHistory();
 	static void ClearMapCompletes();
 	static void ClearKeyCompletes();
 	static void SetHistorySize(size_t newSize);
 	static void AddAutoComplete(const std::string& command);
 	static void SetMapCompletes(const std::vector<std::string>& maps);
+	static void AddText(TextColors textColor, TextStyles textStyle, const char* fmt, ...) IM_FMTARGS(2);
+	static void ConsoleDelegate(const std::string& text, TextColors textColor, TextStyles textStyle);
+	void ExecuteCommand(const char* commandText, TextStyles textStyle);
 	void ResetAutoComplete();
-	void AddText(TextColors color, TextStyles style, const char* fmt, ...) IM_FMTARGS(2);
-	void ExecuteCommand(const char* commandText, TextColors color, TextStyles style);
-	void CommandDelegate(const std::string& text, TextColors color, TextStyles style);
 	int32_t TextEditCallback(ImGuiInputTextCallbackData* data);
 };
 

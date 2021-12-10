@@ -865,6 +865,7 @@ void ImConsole::OnDetatch()
 	{
 		ClearAutoCompletes();
 		ClearConsole();
+		ClearQueue();
 		ClearHistory();
 		ClearMapCompletes();
 		ClearKeyCompletes();
@@ -1020,7 +1021,7 @@ void ImConsole::OnRender()
 
 					if (bufferText[0])
 					{
-						ExecuteCommand(bufferText, TextColors::White, TextStyles::Regular);
+						ExecuteCommand(bufferText, TextStyles::Regular);
 					}
 
 					strcpy_s(bufferText, sizeof(bufferText), "");
@@ -1035,7 +1036,7 @@ void ImConsole::OnRender()
 
 					if (bufferText[0])
 					{
-						ExecuteCommand(bufferText, TextColors::White, TextStyles::Regular);
+						ExecuteCommand(bufferText, TextStyles::Regular);
 					}
 
 					strcpy_s(bufferText, sizeof(bufferText), "");
@@ -1196,6 +1197,16 @@ void ImConsole::ClearConsole()
 	ConsoleText.clear();
 }
 
+void ImConsole::ClearQueue()
+{
+	for (size_t i = 0; i < ConsoleQueue.size(); i++)
+	{
+		ConsoleQueue[i].FreeData();
+	}
+
+	ConsoleQueue.clear();
+}
+
 void ImConsole::SetHistorySize(size_t newSize)
 {
 	if (newSize <= 5120)
@@ -1219,17 +1230,9 @@ void ImConsole::SetMapCompletes(const std::vector<std::string>& maps)
 	}
 }
 
-void ImConsole::ResetAutoComplete()
-{
-	CandidatePos = 0;
-	ArgumentType = ImArgumentIds::IM_None;
-	Candidates.clear();
-}
-
 void ImConsole::AddText(TextColors color, TextStyles style, const char* fmt, ...)
 {
 	char buffer[2048];
-
 	va_list args;
 	va_start(args, fmt);
 	vsnprintf(buffer, IM_ARRAYSIZE(buffer), fmt, args);
@@ -1259,14 +1262,37 @@ void ImConsole::AddText(TextColors color, TextStyles style, const char* fmt, ...
 	}
 }
 
-void ImConsole::ExecuteCommand(const char* commandText, TextColors color, TextStyles style)
+void ImConsole::ConsoleDelegate(const std::string& text, TextColors textColor, TextStyles textStyle)
+{
+	//if (ImmediateComponent::IsInitialized())
+	//{
+		if (!ConsoleQueue.empty())
+		{
+			for (size_t i = 0; i < ConsoleQueue.size(); i++)
+			{
+				QueueData& queueData = ConsoleQueue[i];
+				AddText(queueData.Id, queueData.Style, queueData.Text);
+			}
+
+			ClearQueue();
+		}
+
+		AddText(textColor, textStyle, XSTR("%s"), text.c_str());
+	//}
+	//else
+	//{
+		ConsoleQueue.push_back(QueueData(textColor, textStyle, ImUtils::Strdup(text.c_str())));
+	//}
+}
+
+void ImConsole::ExecuteCommand(const char* commandText, TextStyles textStyle);
 {
 	ResetAutoComplete();
 	AddText(TextColors::User, style, "# %s", commandText);
 
 	HistoryPos = -1;
 
-	if (UserHistory.size() >= 128)
+	if (UserHistory.size() >= 64)
 	{
 		for (size_t i = 0; i < UserHistory.size(); i++)
 		{
@@ -1306,9 +1332,11 @@ void ImConsole::ExecuteCommand(const char* commandText, TextColors color, TextSt
 	ScrollToBottom = true;
 }
 
-void ImConsole::CommandDelegate(const std::string& text, TextColors color, TextStyles style)
+void ImConsole::ResetAutoComplete()
 {
-	AddText(color, style, "%s", text.c_str());
+	CandidatePos = 0;
+	ArgumentType = ImArgumentIds::IM_None;
+	Candidates.clear();
 }
 
 int32_t ImConsole::TextEditCallback(ImGuiInputTextCallbackData* data)
