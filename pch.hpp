@@ -1,0 +1,19 @@
+#pragma once
+#include "ImGui/Includes.h"
+
+#include <Windows.h>
+#include <map>
+#include <unordered_map>
+#include <iostream>
+#include <iomanip>
+#include <functional>
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <stdlib.h>
+#include <stdio.h>
+#include <chrono>
+#include <thread>
+#include <string>
+#include <cmath>
+#include <filesystem>
