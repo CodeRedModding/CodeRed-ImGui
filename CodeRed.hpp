@@ -88,9 +88,13 @@ namespace ImClasses
 		std::string Package;
 		std::string Caller;
 		std::string Function;
+		int32_t Index;
 
 	public:
-		FunctionData(const std::string& fullName, const std::string& package, const std::string& caller, const std::string& function);
+		FunctionData();
+		FunctionData(const FunctionData& functionData);
+		FunctionData(class UObject* caller, class UFunction* function);
+		FunctionData(const std::string& fullName, const std::string& package, const std::string& caller, const std::string& function, int32_t index);
 		~FunctionData();
 
 	public:
@@ -150,10 +154,12 @@ class ImFunctionScanner : public ImInterface
 private:
 	std::string ClipboardText;
 	ImGuiTableFlags TableFlags;
-	std::vector<ImClasses::FunctionData> FunctionHistory;
 	ImGuiTextFilter Whitelist;
 	ImGuiTextFilter Blacklist;
+	std::vector<ImClasses::FunctionData> FunctionHistory;
+	std::unordered_map<int32_t, std::pair<ImClasses::FunctionData, size_t>> FunctionMap;
 	static inline bool ScanFunctions;
+	static inline bool HideDuplicates;
 
 public:
 	ImFunctionScanner(const std::string& title, const std::string& name, std::function<void(std::string, bool)> toggleCallback, bool bShowCursor = true);
@@ -167,6 +173,7 @@ public:
 public:
 	static bool IsScanning();
 	void SaveToFile();
+	void ClearTable();
 	bool PassesFilter(const std::string& textToFilter);
 	void OnProcessEvent(class UObject* caller, class UFunction* function); // Here is where you could send ProcessEvent to from your game.
 };

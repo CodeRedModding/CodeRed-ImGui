@@ -27,7 +27,54 @@ namespace ImClasses
 		return *this;
 	}
 
-	FunctionData::FunctionData(const std::string& fullName, const std::string& package, const std::string& caller, const std::string& function) : FullName(fullName), Package(package), Caller(caller), Function(function) {}
+	FunctionData::FunctionData() :
+		FullName("null"),
+		Package("null"),
+		Caller("null"),
+		Function("null"),
+		Index(0)
+	{
+
+	}
+
+	FunctionData::FunctionData(const FunctionData& functionData) :
+		FullName(functionData.FullName),
+		Package(functionData.Package),
+		Caller(functionData.Caller),
+		Function(functionData.Function),
+		Index(functionData.Index)
+	{
+
+	}
+
+	FunctionData::FunctionData(class UObject* caller, class UFunction* function) :
+		FullName("null"),
+		Package("null"),
+		Caller("null"),
+		Function("null"),
+		Index(0)
+	{
+		// Requires and actual SDK for your game, so that's why this is commented out.
+
+		//if (caller && function)
+		//{
+		//	FullName = function->GetFullName();
+		//	Package = function->GetPackageObj()->GetName();
+		//	Caller = caller->GetName();
+		//	Function = function->GetName();
+		//	Index = function->ObjectInternalInteger;
+		//}
+	}
+
+	FunctionData::FunctionData(const std::string& fullName, const std::string& package, const std::string& caller, const std::string& function, int32_t index) :
+		FullName(fullName),
+		Package(package),
+		Caller(caller),
+		Function(function),
+		Index(index)
+	{
+
+	}
 
 	FunctionData::~FunctionData() {}
 
@@ -37,6 +84,7 @@ namespace ImClasses
 		Package = functionData.Package;
 		Caller = functionData.Caller;
 		Function = functionData.Function;
+		Index = functionData.Index;
 		return *this;
 	}
 }
@@ -196,7 +244,7 @@ void ImFunctionScanner::OnRender()
 
 		if (!FunctionHistory.empty())
 		{
-			newTitle += (" - " + std::to_string(FunctionHistory.size()) + " Functions###FunctionScanner");
+			newTitle += (" - " + (HideDuplicates ? std::to_string(FunctionMap.size()) : std::to_string(FunctionHistory.size())) + " Functions###FunctionScanner");
 		}
 		else
 		{
@@ -240,52 +288,107 @@ void ImFunctionScanner::OnRender()
 
 			ImGui::SameLine(); if (ImGui::Button("Clear Table")) { FunctionHistory.clear(); }
 			ImGui::SameLine(); if (ImGui::Button("Save to File")) { SaveToFile(); }
+			ImGui::SameLine(); ImGui::Checkbox("Hide duplicates###Scanner_Hide_Dupes", &HideDuplicates);
 			ImGui::Spacing();
 
-			if (ImGui::BeginTable("###FunctionScanner_Table", 3, TableFlags))
+			if (HideDuplicates)
 			{
-				bool copy_to_clipboard = false;
-
-				if (ImGui::BeginPopupContextWindow())
+				if (ImGui::BeginTable("###FunctionScanner_Duplicate_Table", 4, TableFlags))
 				{
-					copy_to_clipboard = ImGui::Selectable("Copy to Clipboard");
-					ImGui::EndPopup();
-				}
+					bool copy_to_clipboard = false;
 
-				ImGui::TableSetupColumn("Package Object", ImGuiTableColumnFlags_WidthFixed, 100.0f);
-				ImGui::TableSetupColumn("Calling Class", ImGuiTableColumnFlags_WidthStretch);
-				ImGui::TableSetupColumn("Function Name", ImGuiTableColumnFlags_WidthStretch);
-				ImGui::TableHeadersRow();
-
-				for (size_t i = 0; i < FunctionHistory.size(); i++)
-				{
-					const ImClasses::FunctionData& data = FunctionHistory[i];
-
-					if (PassesFilter(data.FullName))
+					if (ImGui::BeginPopupContextWindow())
 					{
-						ImGui::TableNextRow();
-						ImGui::TableSetColumnIndex(0);
-						ImGui::Text(data.Package.c_str());
-						ImGui::TableSetColumnIndex(1);
-						ImGui::Text(data.Caller.c_str());
-						ImGui::TableSetColumnIndex(2);
-						ImGui::Text(data.Function.c_str());
+						copy_to_clipboard = ImGui::Selectable("Copy to Clipboard");
+						ImGui::EndPopup();
+					}
 
-						if (copy_to_clipboard)
+					ImGui::TableSetupColumn("Calls", ImGuiTableColumnFlags_WidthFixed, 20.0f);
+					ImGui::TableSetupColumn("Package Object", ImGuiTableColumnFlags_WidthFixed, 100.0f);
+					ImGui::TableSetupColumn("Calling Class", ImGuiTableColumnFlags_WidthStretch);
+					ImGui::TableSetupColumn("Function Name", ImGuiTableColumnFlags_WidthStretch);
+					ImGui::TableHeadersRow();
+
+					for (const auto& dataIt : FunctionMap)
+					{
+						const ImClasses::FunctionData& data = dataIt.second.first;
+
+						if (PassesFilter(data.FullName))
 						{
-							ClipboardText += data.FullName;
-							ClipboardText += "\n";
+							ImGui::TableNextRow();
+							ImGui::TableSetColumnIndex(0);
+							ImGui::Text("%d", dataIt.second.second);
+							ImGui::TableSetColumnIndex(1);
+							ImGui::TextUnformatted(data.Package.c_str());
+							ImGui::TableSetColumnIndex(2);
+							ImGui::TextUnformatted(data.Caller.c_str());
+							ImGui::TableSetColumnIndex(3);
+							ImGui::TextUnformatted(data.Function.c_str());
+
+							if (copy_to_clipboard)
+							{
+								ClipboardText += data.FullName;
+								ClipboardText += "\n";
+							}
 						}
 					}
-				}
 
-				if (copy_to_clipboard && ClipboardText.length() > 0)
+					if (copy_to_clipboard && ClipboardText.length() > 0)
+					{
+						ImGui::SetClipboardText(ClipboardText.c_str());
+						ClipboardText.clear();
+					}
+
+					ImGui::EndTable();
+				}
+			}
+			else
+			{
+				if (ImGui::BeginTable("###FunctionScanner_Default_Table", 3, TableFlags))
 				{
-					ImGui::SetClipboardText(ClipboardText.c_str());
-					ClipboardText.clear();
-				}
+					bool copy_to_clipboard = false;
 
-				ImGui::EndTable();
+					if (ImGui::BeginPopupContextWindow())
+					{
+						copy_to_clipboard = ImGui::Selectable("Copy to Clipboard");
+						ImGui::EndPopup();
+					}
+
+					ImGui::TableSetupColumn("Package Object", ImGuiTableColumnFlags_WidthFixed, 100.0f);
+					ImGui::TableSetupColumn("Calling Class", ImGuiTableColumnFlags_WidthStretch);
+					ImGui::TableSetupColumn("Function Name", ImGuiTableColumnFlags_WidthStretch);
+					ImGui::TableHeadersRow();
+
+					for (size_t i = 0; i < FunctionHistory.size(); i++)
+					{
+						const ImClasses::FunctionData& data = FunctionHistory[i];
+
+						if (PassesFilter(data.FullName))
+						{
+							ImGui::TableNextRow();
+							ImGui::TableSetColumnIndex(0);
+							ImGui::TextUnformatted(data.Package.c_str());
+							ImGui::TableSetColumnIndex(1);
+							ImGui::TextUnformatted(data.Caller.c_str());
+							ImGui::TableSetColumnIndex(2);
+							ImGui::TextUnformatted(data.Function.c_str());
+
+							if (copy_to_clipboard)
+							{
+								ClipboardText += data.FullName;
+								ClipboardText += "\n";
+							}
+						}
+					}
+
+					if (copy_to_clipboard && ClipboardText.length() > 0)
+					{
+						ImGui::SetClipboardText(ClipboardText.c_str());
+						ClipboardText.clear();
+					}
+
+					ImGui::EndTable();
+				}
 			}
 
 			ImGui::End();
@@ -313,13 +416,29 @@ void ImFunctionScanner::SaveToFile()
 	{
 		std::ofstream functionTable("FunctionDump_" + std::to_string(std::time(nullptr)) + ".txt");
 
-		for (const ImClasses::FunctionData& functionData : FunctionHistory)
+		if (HideDuplicates)
 		{
-			functionTable << functionData.FullName << std::endl;
+			for (const auto& functionData : FunctionMap)
+			{
+				functionTable << functionData.second.first.FullName << std::endl;
+			}
+		}
+		else
+		{
+			for (const ImClasses::FunctionData& functionData : FunctionHistory)
+			{
+				functionTable << functionData.FullName << std::endl;
+			}
 		}
 
 		functionTable.close();
 	}
+}
+
+void ImFunctionScanner::ClearTable()
+{
+	FunctionMap.clear();
+	FunctionHistory.clear();
 }
 
 bool ImFunctionScanner::PassesFilter(const std::string& textToFilter)
@@ -364,11 +483,22 @@ void ImFunctionScanner::OnProcessEvent(class UObject* caller, class UFunction* f
 	if (ShouldRender() && IsScanning() && caller && function)
 	{
 		// Requires and actual SDK for your game, so that's why this is commented out.
+		// 
 		//std::string fullName = function->GetFullName();
 
 		//if (PassesFilter(fullName.c_str()))
 		//{
-		//	FunctionHistory.push_back(ImClasses::FunctionData(fullName, function->GetPackageObj()->GetName(), caller->GetName().c_str(), function->GetName().c_str()));
+		//	ImClasses::FunctionData newEntry(caller, function);
+		//	FunctionHistory.push_back(newEntry);
+
+		//	if (FunctionMap.find(newEntry.Index) == FunctionMap.end())
+		//	{
+		//		FunctionMap.emplace(newEntry.Index, std::make_pair(newEntry, 0));
+		//	}
+		//	else
+		//	{
+		//		FunctionMap[newEntry.Index].second++;
+		//	}
 		//}
 	}
 }
