@@ -27,6 +27,10 @@ namespace ImClasses
 		return *this;
 	}
 
+	FunctionCount::FunctionCount() : Calls(0) {}
+
+	FunctionCount::~FunctionCount() {}
+
 	FunctionData::FunctionData() :
 		FullName("null"),
 		Package("null"),
@@ -311,13 +315,13 @@ void ImFunctionScanner::OnRender()
 
 					for (const auto& dataIt : FunctionMap)
 					{
-						const ImClasses::FunctionData& data = dataIt.second.first;
+						const ImClasses::FunctionData& data = dataIt.second;
 
 						if (PassesFilter(data.FullName))
 						{
 							ImGui::TableNextRow();
 							ImGui::TableSetColumnIndex(0);
-							ImGui::Text("%d", dataIt.second.second);
+							ImGui::Text("%d", data.Calls);
 							ImGui::TableSetColumnIndex(1);
 							ImGui::TextUnformatted(data.Package.c_str());
 							ImGui::TableSetColumnIndex(2);
@@ -420,12 +424,12 @@ void ImFunctionScanner::SaveToFile()
 		{
 			for (const auto& functionData : FunctionMap)
 			{
-				functionTable << functionData.second.first.FullName << std::endl;
+				functionTable << functionData.second.FullName << std::endl;
 			}
 		}
 		else
 		{
-			for (const ImClasses::FunctionData& functionData : FunctionHistory)
+			for (const auto& functionData : FunctionHistory)
 			{
 				functionTable << functionData.FullName << std::endl;
 			}
@@ -491,14 +495,16 @@ void ImFunctionScanner::OnProcessEvent(class UObject* caller, class UFunction* f
 		//	ImClasses::FunctionData newEntry(caller, function);
 		//	FunctionHistory.push_back(newEntry);
 
-		//	if (FunctionMap.find(newEntry.Index) == FunctionMap.end())
+		//	for (auto& data : FunctionMap)
 		//	{
-		//		FunctionMap.emplace(newEntry.Index, std::make_pair(newEntry, 0));
+		//		if (data.first == newEntry.Index)
+		//		{
+		//			data.second.Calls++;
+		//			return;
+		//		}
 		//	}
-		//	else
-		//	{
-		//		FunctionMap[newEntry.Index].second++;
-		//	}
+
+		//	FunctionMap.push_back(std::make_pair(newEntry.Index, newEntry));
 		//}
 	}
 }

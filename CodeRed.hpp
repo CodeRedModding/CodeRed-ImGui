@@ -81,7 +81,17 @@ namespace ImClasses
 		QueueData& operator=(const QueueData& queueData);
 	};
 
-	class FunctionData
+	class FunctionCount
+	{
+	public:
+		size_t Calls;
+
+	public:
+		FunctionCount();
+		~FunctionCount();
+	};
+
+	class FunctionData : public FunctionCount
 	{
 	public:
 		std::string FullName;
@@ -157,7 +167,7 @@ private:
 	ImGuiTextFilter Whitelist;
 	ImGuiTextFilter Blacklist;
 	std::vector<ImClasses::FunctionData> FunctionHistory;
-	std::unordered_map<int32_t, std::pair<ImClasses::FunctionData, size_t>> FunctionMap;
+	std::vector<std::pair<int32_t, ImClasses::FunctionData>> FunctionMap;
 	static inline bool ScanFunctions;
 	static inline bool HideDuplicates;
 
