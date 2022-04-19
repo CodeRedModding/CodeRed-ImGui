@@ -31,6 +31,15 @@ enum class TextColors : uint32_t
 	END
 };
 
+enum class CornerPositions : uint8_t
+{
+	Custom,
+	TopLeft,
+	TopRight,
+	BottomLeft,
+	BottomRight
+};
+
 static std::map<TextColors, ImVec4> ImColorMap = {
 	{ TextColors::Black, ImVec4(0.0f, 0.0f, 0.0f, 1.0f) },							// #000000
 	{ TextColors::Grey, ImVec4(0.72549f, 0.72549f, 0.72549f, 1.0f) },				// #B9B9B9
@@ -157,6 +166,67 @@ public:
 	void OnAttach() override;
 	void OnDetatch() override;
 	void OnRender() override;
+};
+
+class ImNotification : public ImInterface
+{
+private:
+	float WindowPadding;
+	float WindowOffset;
+	ImGuiWindowFlags WindowFlags;
+
+private:
+	CornerPositions Corner;
+	std::string Title;
+	std::string Description;
+	ImVec4 TitleColor;
+	ImVec4 DescriptionColor;
+
+private:
+	float DeltaTime;
+	float CutoffTime;
+	float BaseAlpha;
+	float LastAlpha;
+	bool FadeOut;
+
+public:
+	ImNotification(const std::string& title, const std::string& name);
+	~ImNotification() override;
+
+public:
+	void OnAttach() override;
+	void OnDetatch() override;
+	void OnRender() override;
+
+public:
+	float GetRenderTime() const;
+	ImNotification* SetInformation(const std::string& title, const std::string& description, TextColors color, CornerPositions corner = CornerPositions::TopLeft);
+	ImNotification* SetTitle(const std::string& title);
+	ImNotification* SetDescription(const std::string& description);
+	ImNotification* SetColor(TextColors color);
+	ImNotification* SetPosition(CornerPositions corner);
+	ImNotification* SetOffset(float offset);
+};
+
+class ImNotificationManager : public ImInterface
+{
+private:
+	static inline std::map<std::string, std::shared_ptr<ImNotification>> CreatedNotifications;
+	static inline std::vector<std::shared_ptr<ImNotification>> ActiveNotifications;
+
+public:
+	ImNotificationManager(const std::string& title, const std::string& name, std::function<void(std::string, bool)> toggleCallback);
+	~ImNotificationManager() override;
+
+public:
+	void OnAttach() override;
+	void OnDetatch() override;
+	void OnRender() override;
+
+public:
+	static void ToggleNotification(const std::string& windowName);
+	static std::shared_ptr<ImNotification> GetNotification(const std::string& windowName);
+	static std::shared_ptr<ImNotification> CreateNotification(ImNotification* notification);
 };
 
 class ImFunctionScanner : public ImInterface
