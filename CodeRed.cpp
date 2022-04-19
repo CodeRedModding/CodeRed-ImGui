@@ -714,7 +714,7 @@ void ImNotificationManager::OnRender()
 
 				if (i != 0)
 				{
-					offset = (i * 85.0f);
+					offset = (i * 85.0f); // 85 being the notification's window height (75) plus padding (10).
 				}
 
 				notification->SetOffset(offset);
