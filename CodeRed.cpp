@@ -491,7 +491,7 @@ void ImNotification::OnAttach()
 	WindowPadding = 10.0f;
 	WindowOffset = 0.0f;
 	Corner = CornerPositions::TopLeft;
-	WindowFlags = (ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
+	WindowFlags = (ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoInputs);
 	DescriptionColor = ImColorMap[TextColors::White];
 	DeltaTime = 0.0f;
 	CutoffTime = 300.0f;
