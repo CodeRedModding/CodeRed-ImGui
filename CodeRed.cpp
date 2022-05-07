@@ -542,7 +542,11 @@ void ImNotification::OnRender()
 		window_pos.y = (Corner == CornerPositions::BottomRight || Corner == CornerPositions::BottomLeft) ? (work_pos.y + work_size.y - WindowPadding) : (work_pos.y + WindowPadding);
 		window_pos_pivot.x = (Corner == CornerPositions::TopRight || Corner == CornerPositions::BottomRight) ? 1.0f : 0.0f;
 		window_pos_pivot.y = (Corner == CornerPositions::BottomRight || Corner == CornerPositions::BottomLeft) ? 1.0f : 0.0f;
-		window_pos.y += WindowOffset;
+		
+		if (Corner == CornerPositions::TopLeft) { window_pos.y += WindowOffset; }
+		else if (Corner == CornerPositions::TopRight) { window_pos.y += WindowOffset; }
+		else if (Corner == CornerPositions::BottomLeft) { window_pos.y -= WindowOffset; }
+		else if (Corner == CornerPositions::BottomRight) { window_pos.y -= WindowOffset; }
 
 		ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
 		ImGui::SetNextWindowSize(ImVec2(325.0f, 75.0f), ImGuiCond_Always);
