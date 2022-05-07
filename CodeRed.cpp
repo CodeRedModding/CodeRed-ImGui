@@ -830,7 +830,7 @@ void ImTerminal::OnRender()
 			bool copy_to_clipboard = false;
 			const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
 
-			if (ImGui::BeginChild("ScrollingRegion###Terminal_ScrollRegion", ImVec2(0.0f, -footer_height_to_reserve), false))
+			if (ImGui::BeginChild("###Terminal_ScrollRegion", ImVec2(0.0f, -footer_height_to_reserve), false))
 			{
 				if (ImGui::BeginPopupContextWindow())
 				{
@@ -842,18 +842,14 @@ void ImTerminal::OnRender()
 
 					ImGui::MenuItem("Auto Scroll", "", &AutoScroll);
 					copy_to_clipboard = ImGui::Selectable("Copy to Clipboard");
-					if (ImGui::Selectable("Clear Terminal")) { ConsoleText.clear(); }
-					if (ImGui::Selectable("Clear History")) { UserHistory.clear(); }
+					if (ImGui::Selectable("Clear Terminal###Terminal_ClearText")) { ConsoleText.clear(); }
+					if (ImGui::Selectable("Clear History###Terminal_ClearHistory")) { UserHistory.clear(); }
 
 					ImGui::EndPopup();
 				}
 
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4.0f, 1.0f));
-
-				if (copy_to_clipboard)
-				{
-					ImGui::LogToClipboard();
-				}
+				if (copy_to_clipboard) { ImGui::LogToClipboard(); }
 
 				for (size_t i = 0; i < ConsoleText.size(); i++)
 				{
@@ -882,28 +878,27 @@ void ImTerminal::OnRender()
 
 				ImGui::PushItemWidth((ImGui::GetWindowSize().x - (ImGui::GetStyle().WindowPadding.x * 2.0f)) - 55.0f);
 
-				if (ImGui::InputText("###TerminalInputText", InputBuffer, IM_ARRAYSIZE(InputBuffer), InputFlags, [](ImGuiInputTextCallbackData* data) -> int32_t { return reinterpret_cast<ImTerminal*>(data->UserData)->TextEditCallback(data); }, reinterpret_cast<void*>(this)))
+				if (ImGui::InputText("###Terminal_InputText", InputBuffer, IM_ARRAYSIZE(InputBuffer), InputFlags, [](ImGuiInputTextCallbackData* data) -> int32_t { return reinterpret_cast<ImTerminal*>(data->UserData)->TextEditCallback(data); }, reinterpret_cast<void*>(this)))
 				{
 					char* bufferText = InputBuffer;
 					ImExtensions::Strtrim(bufferText);
 
-					if (bufferText[0]) { ExecuteCommand(bufferText, TextStyles::Regular); }
+					if (bufferText[0]) { ExecuteCommand(bufferText); }
 
 					strcpy_s(bufferText, sizeof(bufferText), "");
 					reclaim_focus = true;
 				}
 
-				ImGui::SameLine();
-				if (ImGui::Button("Enter"))
+				ImGui::SameLine(); if (ImGui::Button("Enter###Terminal_EnterButton"))
 				{
 					char* bufferText = InputBuffer;
 					ImExtensions::Strtrim(bufferText);
-
-					if (bufferText[0]) { ExecuteCommand(bufferText, TextStyles::Regular); }
-
+					if (bufferText[0]) { ExecuteCommand(bufferText); }
 					strcpy_s(bufferText, sizeof(bufferText), "");
 					reclaim_focus = true;
 				}
+
+				ImGui::PopItemWidth();
 
 				if (std::strlen(InputBuffer) == 0) { ResetAutoComplete(); }
 
@@ -912,10 +907,8 @@ void ImTerminal::OnRender()
 					ImVec2 consolePos = ImGui::GetWindowPos();
 					consolePos.y += ImGui::GetWindowHeight() + 5.0f;
 
-					if (ArgumentType == ImArgumentIds::IM_Interfaces)
-					{
-						consolePos.x += 85.0f;
-					}
+					if (ArgumentType == ImArgumentIds::IM_Interfaces) { consolePos.x += 85.0f; }
+					else if (ArgumentType == ImArgumentIds::IM_Example) { consolePos.x += 0.0f; } // Example, purpose of different commands having different auto-complete positions.
 
 					ImGui::SetNextWindowPos(consolePos);
 
@@ -931,7 +924,7 @@ void ImTerminal::OnRender()
 							{
 								childSize.y += 18.25f;
 
-								if (childSize.y > 130.0f)
+								if (childSize.y > 130.0f) // Cutoff point, if there are more than "i" candidates it will no longer grow in size.
 								{
 									childSize.y = 130.0f;
 									break;
@@ -959,7 +952,6 @@ void ImTerminal::OnRender()
 					}
 				}
 
-				ImGui::PopItemWidth();
 				ImGui::SetItemDefaultFocus();
 				if (reclaim_focus) { ImGui::SetKeyboardFocusHere(-1); }
 			}

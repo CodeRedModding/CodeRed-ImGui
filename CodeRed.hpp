@@ -4,7 +4,8 @@
 enum class ImArgumentIds : uint8_t
 {
 	IM_None,
-	IM_Interfaces
+	IM_Interfaces,
+	IM_Example
 };
 
 enum class TextStyles : uint8_t
@@ -301,7 +302,7 @@ public:
 	static void ConsoleDelegate(const std::string& text, TextColors textColor, TextStyles textStyle);
 
 public:
-	void ExecuteCommand(const std::string& command, TextStyles textStyle);
+	void ExecuteCommand(const std::string& command, TextStyles textStyle = TextStyles::Regular);
 	void ResetAutoComplete();
 	int32_t TextEditCallback(struct ImGuiInputTextCallbackData* data);
 };
