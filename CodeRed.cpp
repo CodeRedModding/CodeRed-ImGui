@@ -266,6 +266,7 @@ void ImFunctionScanner::OnRender()
 				ImGui::TableSetupColumn("Text", ImGuiTableColumnFlags_WidthFixed, 50.0f);
 				ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch);
 
+				// Whitelist
 				{
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0);
@@ -274,6 +275,7 @@ void ImFunctionScanner::OnRender()
 					Whitelist.Draw(" Filter: (\"incl\") (\"error\")###Scanner_Whitelist");
 				}
 
+				// Blacklist
 				{
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0);
@@ -394,14 +396,14 @@ void ImFunctionScanner::OnRender()
 					ImGui::EndTable();
 				}
 			}
-
-			ImGui::End();
 		}
 		else
 		{
 			SetShouldRender(false);
 			ScanFunctions = false;
 		}
+
+		ImGui::End();
 	}
 	else
 	{
@@ -577,8 +579,9 @@ void ImNotification::OnRender()
 			}
 
 			DeltaTime += GetRenderTime();
-			ImGui::End();
 		}
+
+		ImGui::End();
 	}
 }
 
@@ -959,9 +962,9 @@ void ImTerminal::OnRender()
 				ImGui::SetItemDefaultFocus();
 				if (reclaim_focus) { ImGui::SetKeyboardFocusHere(-1); }
 			}
-
-			ImGui::End();
 		}
+
+		ImGui::End();
 	}
 }
 
