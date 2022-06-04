@@ -1,4 +1,4 @@
-# CodeRed-ImGui
+## CodeRed ImGui
 Raw source of some of the ImGui interfaces used in the Rocket League version of CodeRed.
 
 # About
