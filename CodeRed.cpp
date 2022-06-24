@@ -565,9 +565,9 @@ void ImNotification::OnRender()
 				TitleColor.w = LastAlpha;
 				DescriptionColor.w = LastAlpha;
 
-				ImExtensions::TextStyled(Title.c_str(), TitleColor, ImFontMap[TextStyles::Bold]);
+				ImExtensions::TextStyled(Title, TitleColor, ImFontMap[TextStyles::Bold]);
 				ImGui::PushTextWrapPos(ImGui::GetWindowWidth() - 1.0f);
-				ImExtensions::TextStyled(Description.c_str(), DescriptionColor, ImFontMap[TextStyles::Regular]);
+				ImExtensions::TextStyled(Description, DescriptionColor, ImFontMap[TextStyles::Regular]);
 				ImGui::PopTextWrapPos();
 			}
 
@@ -943,7 +943,7 @@ void ImTerminal::OnRender()
 									const std::pair<std::string, bool>& candidate = Candidates[i];
 
 									ImExtensions::TextStyled(
-										Candidates[i].first.c_str(),
+										Candidates[i].first,
 										(candidate.second ? ImColorMap[TextColors::White] : ImColorMap[TextColors::Grey]),
 										(candidate.second ? ImFontMap[TextStyles::Italic] : nullptr
 									));
