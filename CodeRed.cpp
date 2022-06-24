@@ -245,15 +245,8 @@ void ImFunctionScanner::OnRender()
 	if (ShouldRender())
 	{
 		std::string newTitle = GetTitle();
-
-		if (!FunctionHistory.empty())
-		{
-			newTitle += (" - " + (HideDuplicates ? std::to_string(FunctionMap.size()) : std::to_string(FunctionHistory.size())) + " Functions###FunctionScanner");
-		}
-		else
-		{
-			newTitle += "###FunctionScanner";
-		}
+		if (!FunctionHistory.empty()) { newTitle += (" - " + (HideDuplicates ? std::to_string(FunctionMap.size()) : std::to_string(FunctionHistory.size())) + " Functions"); }
+		newTitle += "###ScannerWindow";
 
 		ImGui::SetNextWindowSize(ImVec2(500.0f, 625.0f), ImGuiCond_Once);
 
@@ -289,17 +282,17 @@ void ImFunctionScanner::OnRender()
 
 			ImGui::Spacing();
 
-			if (IsScanning()) { if (ImGui::Button("Stop Monitoring")) { ScanFunctions = false; } }
-			else { if (ImGui::Button("Start Monitoring")) { ScanFunctions = true; } }
+			if (IsScanning()) { if (ImGui::Button("Stop monitoring")) { ScanFunctions = false; } }
+			else { if (ImGui::Button("Start monitoring")) { ScanFunctions = true; } }
 
-			ImGui::SameLine(); if (ImGui::Button("Clear Table")) { FunctionHistory.clear(); }
-			ImGui::SameLine(); if (ImGui::Button("Save to File")) { SaveToFile(); }
+			ImGui::SameLine(); if (ImGui::Button("Clear table")) { FunctionHistory.clear(); }
+			ImGui::SameLine(); if (ImGui::Button("Save to file")) { SaveToFile(); }
 			ImGui::SameLine(); ImGui::Checkbox("Hide duplicates###Scanner_Hide_Dupes", &HideDuplicates);
 			ImGui::Spacing();
 
 			if (HideDuplicates)
 			{
-				if (ImGui::BeginTable("###FunctionScanner_Duplicate_Table", 4, TableFlags))
+				if (ImGui::BeginTable("###Scanner_Duplicate_Table", 4, TableFlags))
 				{
 					bool copy_to_clipboard = false;
 
@@ -350,13 +343,13 @@ void ImFunctionScanner::OnRender()
 			}
 			else
 			{
-				if (ImGui::BeginTable("###FunctionScanner_Default_Table", 3, TableFlags))
+				if (ImGui::BeginTable("###Scanner_Default_Table", 3, TableFlags))
 				{
 					bool copy_to_clipboard = false;
 
 					if (ImGui::BeginPopupContextWindow())
 					{
-						copy_to_clipboard = ImGui::Selectable("Copy to Clipboard");
+						copy_to_clipboard = ImGui::Selectable("Copy to clipboard");
 						ImGui::EndPopup();
 					}
 
@@ -484,7 +477,7 @@ bool ImFunctionScanner::PassesFilter(const std::string& textToFilter)
 	return true;
 }
 
-ImNotification::ImNotification(const std::string& title, const std::string& name) : ImInterface(title, name, NULL, false) {}
+ImNotification::ImNotification(const std::string& title, const std::string& name, const ImVec2& size) : Size(size), ImInterface(title, name, NULL, false) {}
 
 ImNotification::~ImNotification() { OnDetatch(); }
 
@@ -585,6 +578,11 @@ void ImNotification::OnRender()
 	}
 }
 
+const ImVec2& ImNotification::GetSize() const
+{
+	return Size;
+}
+
 float ImNotification::GetRenderTime() const
 {
 	float framerate = ImGui::GetIO().Framerate;
@@ -647,7 +645,7 @@ ImNotificationManager::~ImNotificationManager() { OnDetatch(); }
 void ImNotificationManager::OnAttach()
 {
 	// Create notifications here for them to be properly managed, rendering for them is called in the managers "OnRender" function.
-	CreateNotification(new ImNotification("Example Notification", "example_notification"))->SetInformation("This is an example", "This is an example description!", TextColors::Green);
+	CreateNotification(new ImNotification("Example Notification", "example_notification", ImVec2(325.0f, 75.0f)))->SetInformation("This is an example", "This is an example description!", TextColors::Green);
 	SetAttached(true);
 }
 
@@ -721,7 +719,7 @@ void ImNotificationManager::OnRender()
 
 				if (i != 0)
 				{
-					offset = (i * 85.0f); // 85 being the notification's window height (75) plus padding (10).
+					offset = (i * (notification->GetSize().y + 10.0f)); // 10 Being the padding/spacing between windows.
 				}
 
 				notification->SetOffset(offset);

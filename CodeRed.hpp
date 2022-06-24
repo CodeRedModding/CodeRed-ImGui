@@ -182,6 +182,7 @@ private:
 	std::string Description;
 	ImVec4 TitleColor;
 	ImVec4 DescriptionColor;
+	ImVec2 Size;
 
 private:
 	float DeltaTime;
@@ -191,7 +192,7 @@ private:
 	bool FadeOut;
 
 public:
-	ImNotification(const std::string& title, const std::string& name);
+	ImNotification(const std::string& title, const std::string& name, const ImVec2& size);
 	~ImNotification() override;
 
 public:
@@ -200,6 +201,7 @@ public:
 	void OnRender() override;
 
 public:
+	const ImVec2& GetSize() const;
 	float GetRenderTime() const;
 	ImNotification* SetInformation(const std::string& title, const std::string& description, TextColors color, CornerPositions corner = CornerPositions::TopLeft);
 	ImNotification* SetTitle(const std::string& title);

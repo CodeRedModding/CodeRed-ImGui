@@ -3,6 +3,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#include <string>
 #include "../imgui.h"
 
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
@@ -40,7 +41,8 @@ namespace ImExtensions
 	char* StrCpy(const char* s);
 	void Strtrim(char* s);
 
-	void TextColored(const char* text, const ImVec4& textColor);
-	void TextStyled(const char* text, const ImVec4& textColor, ImFont* textFont);
-	void HelpMarker(const char* desc, float posScale = 35.0f);
+	void Text(const std::string& text);
+	void TextColored(const std::string& text, const ImVec4& textColor);
+	void TextStyled(const std::string& text, const ImVec4& textColor, ImFont* textFont);
+	void HelpMarker(const std::string& desc, float posScale = 35.0f);
 }

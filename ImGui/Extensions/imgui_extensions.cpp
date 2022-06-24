@@ -50,31 +50,46 @@ namespace ImExtensions
 		}
 	}
 
-	void TextColored(const char* text, const ImVec4& textColor)
+	void Text(const std::string& text)
+	{
+		ImGui::TextEx(text.c_str());
+	}
+
+	void TextColored(const std::string& text, const ImVec4& textColor)
 	{
 		ImGui::PushStyleColor(ImGuiCol_Text, textColor);
-		ImGui::TextEx(text);
+		Text(text);
 		ImGui::PopStyleColor();
 	}
 
-	void TextStyled(const char* text, const ImVec4& textColor, ImFont* textFont)
+	void TextStyled(const std::string& text, const ImVec4& textColor, ImFont* textFont)
 	{
 		if (textFont) { ImGui::PushFont(textFont); }
 		ImGui::PushStyleColor(ImGuiCol_Text, textColor);
-		ImGui::TextEx(text);
+		Text(text);
 		ImGui::PopStyleColor();
 		if (textFont) { ImGui::PopFont(); }
 	}
 
-	void HelpMarker(const char* desc, float posScale)
+	void TextStyled(const std::string& text, ImFont* textFont)
 	{
-		ImGui::TextDisabled("(?)");
+		if (textFont) { ImGui::PushFont(textFont); }
+		Text(text);
+		if (textFont) { ImGui::PopFont(); }
+	}
+
+	void HelpMarker(const std::string& desc, float posScale)
+	{
+		ImGuiContext& g = *GImGui;
+		ImGui::PushStyleColor(ImGuiCol_Text, g.Style.Colors[ImGuiCol_TextDisabled]);
+		Text("(?)");
+		ImGui::PopStyleColor();
 
 		if (ImGui::IsItemHovered())
 		{
 			ImGui::BeginTooltip();
 			ImGui::PushTextWrapPos(ImGui::GetFontSize() * posScale);
-			ImGui::TextUnformatted(desc);
+			Text(desc);
 			ImGui::PopTextWrapPos();
 			ImGui::EndTooltip();
 		}
